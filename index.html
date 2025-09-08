@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevOps Workflow Analysis & Strategy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .flow-line {
+        position: relative;
+        border-left: 2px dashed #ffd166;
+      }
+      .flow-line::after {
+        content: "▼";
+        position: absolute;
+        left: -11px;
+        bottom: -5px;
+        color: #ffd166;
+        font-size: 1.25rem;
+      }
+      .branch-line {
+        height: 2px;
+        background-color: #118ab2;
+      }
+      .arrow-right {
+        width: 0;
+        height: 0;
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-left: 8px solid #118ab2;
+      }
+      .cherry-pick-arrow {
+        position: absolute;
+        height: 2px;
+        background: repeating-linear-gradient(
+          90deg,
+          #ff6b6b,
+          #ff6b6b 5px,
+          transparent 5px,
+          transparent 10px
+        );
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 350px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-[#073B4C] text-gray-800">
+    <div class="container mx-auto p-4 md:p-8">
+      <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-6xl font-black text-white mb-2">
+          Release Workflow Health Check
+        </h1>
+        <p class="text-lg text-[#06D6A0]">
+          An analysis of your current process and the path to a scalable future.
+        </p>
+      </header>
+
+      <section id="assessment" class="mb-16">
+        <div class="bg-white rounded-lg shadow-2xl p-8 text-center">
+          <h2 class="text-2xl font-bold text-[#073B4C] mb-4">
+            Overall Assessment
+          </h2>
+          <div
+            class="flex flex-col md:flex-row justify-center items-center gap-8"
+          >
+            <div class="bg-[#FF6B6B] text-white p-6 rounded-lg w-full md:w-1/3">
+              <div class="text-5xl font-black">CRITICAL</div>
+              <div class="text-xl font-semibold mt-2">Sustainability Score</div>
+            </div>
+            <p class="md:w-2/3 text-left text-lg">
+              Your current workflow, heavily reliant on
+              <strong class="text-[#FF6B6B]">cherry-picking</strong> for
+              promotions, is a high-risk strategy. While offering short-term
+              flexibility, it creates significant technical debt, erodes code
+              stability, and is
+              <strong class="text-[#FF6B6B]">not sustainable</strong> for
+              long-term growth. Immediate and strategic changes are required to
+              prevent release failures and maintain development velocity.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="risks" class="mb-16">
+        <h2 class="text-3xl font-bold text-center text-white mb-8">
+          The Diagnosis: Key Risks & Weaknesses
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="bg-white rounded-lg shadow-xl p-6">
+            <h3 class="text-xl font-bold mb-4 text-[#118AB2]">
+              1. Commit History & Branch Divergence
+            </h3>
+            <p class="mb-4">
+              Cherry-picking creates different commit histories on your main
+              branches. They cease to be related, making it impossible to
+              confidently compare environments. You are effectively maintaining
+              multiple, slightly different codebases.
+            </p>
+            <div class="relative h-40">
+              <div class="absolute top-4 left-4 right-4">
+                <p class="font-mono text-sm mb-1 text-green-600 font-bold">
+                  Ideal State
+                </p>
+                <div class="flex items-center">
+                  <span
+                    class="font-mono text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                    >main</span
+                  >
+                  <div class="w-full h-1 bg-green-500"></div>
+                </div>
+              </div>
+              <div class="absolute bottom-4 left-4 right-4">
+                <p class="font-mono text-sm mb-1 text-red-600 font-bold">
+                  Your Current State
+                </p>
+                <div class="relative">
+                  <div class="flex items-center mb-2">
+                    <span
+                      class="font-mono text-xs bg-red-100 text-red-800 px-2 py-1 rounded"
+                      >DEV</span
+                    >
+                    <div class="w-full h-1 bg-red-400 flex justify-around">
+                      <div class="w-2 h-2 bg-red-600 rounded-full"></div>
+                      <div class="w-2 h-2 bg-red-600 rounded-full"></div>
+                      <div class="w-2 h-2 bg-red-600 rounded-full"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center">
+                    <span
+                      class="font-mono text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded"
+                      >BETA</span
+                    >
+                    <div class="w-full h-1 bg-yellow-400 flex justify-around">
+                      <div
+                        class="w-2 h-2 bg-yellow-600 rounded-full ml-10"
+                      ></div>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute top-5 left-1/2 w-px h-6 border-l border-dashed border-red-500 -ml-4"
+                  ></div>
+                  <div
+                    class="absolute top-11 left-1/2 w-px h-0 border-l border-red-500 -ml-4 transform -rotate-45 -translate-x-2.5"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-xl p-6">
+            <h3 class="text-xl font-bold mb-4 text-[#118AB2]">
+              2. Merge Complexity: The "Merge Time Bomb"
+            </h3>
+            <p>
+              The longer branches diverge, the harder they are to reconcile. A
+              future attempt to merge `DEV` into `BETA` will likely result in a
+              massive number of "false" conflicts on every cherry-picked commit,
+              creating a highly risky and error-prone merge process.
+            </p>
+            <div class="text-center p-8">
+              <span class="text-8xl">💣</span>
+              <p class="text-2xl font-bold text-[#FF6B6B] mt-2">
+                Merge Conflict Ahead
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-xl p-6">
+            <h3 class="text-xl font-bold mb-4 text-[#118AB2]">
+              3. Traceability & Release Integrity
+            </h3>
+            <p class="mb-4">
+              Your releases are "franken-builds," making it impossible to know
+              exactly what code is in each environment. This increases the risk
+              of missed dependencies, where one commit relies on another that
+              wasn't included in the release, leading to environment-specific
+              bugs.
+            </p>
+            <div
+              class="flex items-center justify-center space-x-2 bg-gray-100 p-4 rounded-lg"
+            >
+              <span class="font-mono text-sm bg-blue-200 p-2 rounded"
+                >Commit A</span
+              >
+              <span class="text-2xl text-gray-400">+</span>
+              <span class="font-mono text-sm bg-blue-200 p-2 rounded"
+                >Commit C</span
+              >
+              <span class="text-2xl text-gray-400">+</span>
+              <span
+                class="font-mono text-sm bg-gray-300 p-2 rounded text-gray-500 line-through"
+                >Commit B (dependency)</span
+              >
+              <span class="text-2xl text-red-500 font-bold">→</span>
+              <span
+                class="font-mono text-sm bg-red-200 p-2 rounded text-red-800"
+                >Broken Build</span
+              >
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-xl p-6">
+            <h3 class="text-xl font-bold mb-4 text-[#118AB2]">
+              4. Scalability & Human Error
+            </h3>
+            <p class="mb-4">
+              The process relies entirely on manual, flawless selection of
+              commits. As the team and codebase grow, this human bottleneck
+              becomes unsustainable, and the probability of error approaches
+              100%.
+            </p>
+            <div class="chart-container">
+              <canvas id="scalabilityChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="improvements" class="mb-16">
+        <h2 class="text-3xl font-bold text-center text-white mb-8">
+          First Aid: Immediate Improvements
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-white rounded-lg shadow-xl p-6 text-center">
+            <div
+              class="bg-[#06D6A0] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4"
+            >
+              1
+            </div>
+            <h3 class="text-xl font-bold mb-2">Group Commits</h3>
+            <p>
+              Instead of cherry-picking individual commits, group work into
+              feature branches. When a feature is requested, cherry-pick the
+              single <strong class="text-[#118AB2]">merge commit</strong>. This
+              keeps related changes together and reduces the risk of missed
+              dependencies.
+            </p>
+          </div>
+          <div class="bg-white rounded-lg shadow-xl p-6 text-center">
+            <div
+              class="bg-[#06D6A0] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4"
+            >
+              2
+            </div>
+            <h3 class="text-xl font-bold mb-2">Automate Versioning</h3>
+            <p>
+              Stop manual version bumps. Implement a tool like
+              <strong class="text-[#118AB2]">Semantic Release</strong> to
+              automatically version, tag, and generate changelogs based on
+              commit messages. This eliminates human error and creates perfect
+              traceability.
+            </p>
+          </div>
+          <div class="bg-white rounded-lg shadow-xl p-6 text-center">
+            <div
+              class="bg-[#06D6A0] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4"
+            >
+              3
+            </div>
+            <h3 class="text-xl font-bold mb-2">Tag Everything</h3>
+            <p>
+              Even with cherry-picking, create an annotated Git tag for every
+              build sent to an environment (e.g.,
+              <strong class="text-[#118AB2]">beta-v1.5.2-RC1</strong>). This
+              provides a permanent, albeit complex, record of what commits
+              constitute that release.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="strategy" class="mb-16">
+        <h2 class="text-3xl font-bold text-center text-white mb-8">
+          The Strategic Cure: Trunk-Based Development with Feature Flags
+        </h2>
+        <p class="text-center text-white text-lg max-w-4xl mx-auto mb-10">
+          This modern approach decouples code deployment from feature release,
+          solving your core problem without the risks of cherry-picking. All
+          code is continuously merged to a single `main` branch, which is always
+          stable. Features are hidden behind flags until they are ready to be
+          activated for clients.
+        </p>
+
+        <div class="bg-white rounded-lg shadow-2xl p-8">
+          <div class="flex flex-col md:flex-row gap-8">
+            <div class="w-full md:w-1/3 space-y-4">
+              <h3 class="text-xl font-bold text-[#073B4C]">The Flow:</h3>
+              <div class="flex items-start">
+                <div
+                  class="bg-[#118AB2] text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center font-bold mr-4"
+                >
+                  1
+                </div>
+                <p>
+                  All developers merge short-lived feature branches into
+                  <strong class="text-[#118AB2]">`main`</strong> (the trunk).
+                  `main` is always stable.
+                </p>
+              </div>
+              <div class="flex items-start">
+                <div
+                  class="bg-[#118AB2] text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center font-bold mr-4"
+                >
+                  2
+                </div>
+                <p>
+                  New features are wrapped in
+                  <strong class="text-[#118AB2]">Feature Flags</strong>, making
+                  them dormant in the code.
+                </p>
+              </div>
+              <div class="flex items-start">
+                <div
+                  class="bg-[#118AB2] text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center font-bold mr-4"
+                >
+                  3
+                </div>
+                <p>
+                  A <strong class="text-[#FFD166]">`release`</strong> branch is
+                  cut from `main` to prepare for deployment.
+                </p>
+              </div>
+              <div class="flex items-start">
+                <div
+                  class="bg-[#118AB2] text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center font-bold mr-4"
+                >
+                  4
+                </div>
+                <p>
+                  The
+                  <strong class="text-[#06D6A0]">same code artifact</strong> is
+                  deployed to BETA, UAT, and PROD.
+                </p>
+              </div>
+              <div class="flex items-start">
+                <div
+                  class="bg-[#118AB2] text-white rounded-full w-8 h-8 flex-shrink-0 flex items-center justify-center font-bold mr-4"
+                >
+                  5
+                </div>
+                <p>
+                  Features are activated per environment using a feature flag
+                  tool—<strong class="text-[#FF6B6B]"
+                    >no code change needed</strong
+                  >.
+                </p>
+              </div>
+            </div>
+            <div class="w-full md:w-2/3 bg-gray-50 p-4 rounded-lg">
+              <div class="relative pl-16">
+                <div
+                  class="absolute left-0 top-0 bottom-0 w-2 bg-[#118AB2] rounded-full"
+                ></div>
+                <p
+                  class="font-mono text-lg font-bold text-[#118AB2] absolute -left-5 top-1/2 -translate-y-1/2 transform -rotate-90"
+                >
+                  main
+                </p>
+
+                <div class="space-y-6">
+                  <div class="relative">
+                    <p class="font-mono text-sm">Feature A merged</p>
+                    <div
+                      class="absolute left-[-56px] top-1/2 -translate-y-1/2 flex items-center w-12"
+                    >
+                      <div class="branch-line w-full"></div>
+                      <div class="arrow-right"></div>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <p class="font-mono text-sm">
+                      Feature B merged (with Feature Flag)
+                    </p>
+                    <div
+                      class="absolute left-[-56px] top-1/2 -translate-y-1/2 flex items-center w-12"
+                    >
+                      <div class="branch-line w-full"></div>
+                      <div class="arrow-right"></div>
+                    </div>
+                  </div>
+                  <div class="relative h-20">
+                    <div
+                      class="absolute left-0 top-1/2 w-40 h-px bg-[#FFD166] border-t-2 border-dashed border-[#FFD166]"
+                    ></div>
+                    <div
+                      class="absolute left-40 top-1/2 -translate-y-1/2 font-mono bg-[#FFD166] text-black px-2 py-1 rounded text-sm"
+                    >
+                      release/1.2
+                    </div>
+                  </div>
+                  <div
+                    class="relative flex justify-around items-center h-24 border-l-2 border-dashed border-[#06D6A0] ml-40 pl-8"
+                  >
+                    <div
+                      class="absolute left-[-1px] top-[-2px] w-4 h-4 rounded-full bg-[#06D6A0] -translate-x-1/2"
+                    ></div>
+
+                    <div class="text-center">
+                      <p class="font-bold">BETA</p>
+                      <p class="text-xs">
+                        Feature B:
+                        <span class="text-green-500 font-bold">ON</span>
+                      </p>
+                    </div>
+                    <div class="text-center">
+                      <p class="font-bold">UAT</p>
+                      <p class="text-xs">
+                        Feature B:
+                        <span class="text-green-500 font-bold">ON</span>
+                      </p>
+                    </div>
+                    <div class="text-center">
+                      <p class="font-bold">PROD</p>
+                      <p class="text-xs">
+                        Feature B:
+                        <span class="text-red-500 font-bold">OFF</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="benefits">
+        <h2 class="text-3xl font-bold text-center text-white mb-8">
+          The Benefits: A Stable, Scalable Future
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold text-[#06D6A0] mb-2">
+              ✅ Unified History
+            </h3>
+            <p>
+              No more branch divergence. `main` is the single source of truth
+              for all code, making comparisons and audits trivial.
+            </p>
+          </div>
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold text-[#06D6A0] mb-2">
+              ✅ Simple Merges
+            </h3>
+            <p>
+              With a single trunk, complex and risky merge conflict resolutions
+              become a thing of the past. Development flow is streamlined.
+            </p>
+          </div>
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold text-[#06D6A0] mb-2">
+              ✅ Absolute Traceability
+            </h3>
+            <p>
+              You know exactly what code is deployed. Feature flags provide a
+              clear audit trail for what behavior is enabled for users.
+            </p>
+          </div>
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-xl font-bold text-[#06D6A0] mb-2">
+              ✅ Low-Risk Releases
+            </h3>
+            <p>
+              Deploying code becomes a safe, routine technical event. Releasing
+              features to users is a separate, instant, and risk-free business
+              decision.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      function wrapLabels(label) {
+        const maxLineLength = 16;
+        if (typeof label !== "string" || label.length <= maxLineLength) {
+          return label;
+        }
+        const words = label.split(" ");
+        const lines = [];
+        let currentLine = "";
+        for (const word of words) {
+          if ((currentLine + " " + word).trim().length > maxLineLength) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = (currentLine + " " + word).trim();
+          }
+        }
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        return lines;
+      }
+
+      const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        if (Array.isArray(label)) {
+          return label.join(" ");
+        }
+        return label;
+      };
+
+      const ctxScalability = document.getElementById("scalabilityChart");
+      if (ctxScalability) {
+        new Chart(ctxScalability, {
+          type: "line",
+          data: {
+            labels: ["2 Devs", "5 Devs", "7 Devs", "10 Devs", "15 Devs"],
+            datasets: [
+              {
+                label: "Risk/Effort in Current Process",
+                data: [1, 3, 6, 10, 15],
+                borderColor: "#FF6B6B",
+                backgroundColor: "rgba(255, 107, 107, 0.2)",
+                fill: true,
+                tension: 0.4,
+              },
+              {
+                label: "Risk/Effort in Proposed Process",
+                data: [1, 1, 1.1, 1.2, 1.2],
+                borderColor: "#06D6A0",
+                backgroundColor: "rgba(6, 214, 160, 0.2)",
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Manual Effort & Risk Level",
+                },
+              },
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  title: tooltipTitleCallback,
+                },
+              },
+            },
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
